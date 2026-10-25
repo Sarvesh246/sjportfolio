@@ -19,7 +19,7 @@ Copy `.env.example` to `.env.local` and set:
 
 - `GITHUB_USER` to show someone else's repos (defaults to `Sarvesh246`).
 - `GITHUB_TOKEN` is worth adding. GitHub allows only 60 anonymous requests an hour, and a token unlocks real commit counts.
-- `NEXT_PUBLIC_CONTACT_EMAIL` for the "Email me" button. It points at a placeholder until you set it.
+- `NEXT_PUBLIC_CONTACT_EMAIL` to change the address behind the "Email me" button (defaults to sarveshvjagtap@gmail.com).
 
 ## Your own thumbnails
 

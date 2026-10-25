@@ -1,7 +1,7 @@
 import type { User } from "@/lib/types";
 
-// Placeholder until a real address is set; the design handoff used the same one.
-const EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@example.com";
+// NEXT_PUBLIC_CONTACT_EMAIL overrides this if you ever want a different address.
+const EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "sarveshvjagtap@gmail.com";
 
 export const Footer = ({ user }: { user: User }) => (
   <footer id="contact" className="mx-auto mt-[clamp(90px,10vw,140px)] max-w-[1280px] px-6 pb-10">
