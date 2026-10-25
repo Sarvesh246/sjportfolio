@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-cream: #fff7e0;
+  --color-sun: #ffd23f;
+  --color-sky: #8ec5ff;
+  --color-bubble: #ff90e8;
+  --color-mint: #b6f2a0;
+  --color-tang: #ff9b5e;
+  --color-hot: #ff4d8d;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --font-display: var(--font-archivo-black), sans-serif;
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  --shadow-hard-sm: 4px 4px 0 #000;
+  --shadow-hard-xs: 2px 2px 0 #000;
+  --shadow-hard: 5px 5px 0 #000;
+  --shadow-hard-md: 6px 6px 0 #000;
+  --shadow-hard-lg: 8px 8px 0 #000;
+  --shadow-hard-xl: 10px 10px 0 #000;
+  --shadow-hard-2xl: 12px 12px 0 #000;
+
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-pop: pop 0.7s both;
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(20px) rotate(-2deg); }
+    to { opacity: 1; transform: none; }
   }
 }
 
+html { scroll-behavior: smooth; scroll-padding-top: 56px; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background-color: #fff7e0;
+  background-image: radial-gradient(#00000022 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  color: #000;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@layer base {
+  a { color: #000; text-decoration: none; }
+}
+::selection { background: #000; color: #ffd23f; }
+input::placeholder { color: #00000088; }
+
+:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+
+/* Shared neobrutal bits. Hover = move by (shadow offset - 2px) and shrink the shadow. */
+/* In the components layer so utilities like bg-sun / hover:bg-sky can still override. */
+@layer components {
+  .nb-link {
+    font: 700 14px/1 var(--font-sans);
+    padding: 12px 18px;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 12px;
+    box-shadow: 4px 4px 0 #000;
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+  }
+  .nb-link:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+
+  .nb-label { font: 700 12px/1 var(--font-mono); text-transform: uppercase; }
+
+  .nb-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .marquee-track { animation: none !important; }
 }

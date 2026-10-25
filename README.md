@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio
 
-## Getting Started
+A portfolio that builds itself from GitHub. Point it at a username and it renders a home page (hero, pinned projects, a searchable list of every repo) and a detail page per project, all in a loud neobrutalist style: thick borders, hard shadows, flat colour.
 
-First, run the development server:
+Think of it as a shop window that restocks itself: push a repo, and within the hour it shows up.
+
+## Quick start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. That's it. No keys needed to look around.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Make it yours
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and set:
 
-## Learn More
+- `GITHUB_USER` to show someone else's repos (defaults to `Sarvesh246`).
+- `GITHUB_TOKEN` is worth adding. GitHub allows only 60 anonymous requests an hour, and a token unlocks real commit counts.
+- `NEXT_PUBLIC_CONTACT_EMAIL` for the "Email me" button. It points at a placeholder until you set it.
 
-To learn more about Next.js, take a look at the following resources:
+## Good to know
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Curated vs live.** `src/lib/seed.ts` holds hand-written copy (descriptions, stack, README summaries) for the repos worth showing off. Live GitHub data fills in everything else and wins for anything that changes: language, last push, homepage, topics.
+- **Pinned projects** come from the `pinned` flags in the seed file, because GitHub's REST API has no "pinned repos" endpoint.
+- **If GitHub is unreachable or rate-limited**, the site falls back to the seed data and retries within ten minutes, rather than breaking.
+- **Screenshots** come from Microlink's free tier, falling back to GitHub's social card. If cards show the social image instead of a screenshot, you've probably hit Microlink's daily limit.
+- Data is cached for an hour (`"use cache"` in `src/lib/github.ts`). This project is on Next.js 16 with Cache Components, so route-level `revalidate` exports won't work; change `cacheLife` instead.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Where things live
 
-## Deploy on Vercel
+- `src/app` has the two routes: `/` and `/projects/[slug]`.
+- `src/components` holds the home view, the motion helpers (`fx.tsx`: scroll reveal, count-up, text scramble), and the shared bits.
+- `src/lib/github.ts` fetches and merges data, `src/lib/seed.ts` is the curated fallback.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Animations respect `prefers-reduced-motion`.
