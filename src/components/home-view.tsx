@@ -10,6 +10,8 @@ import type { Project, User } from "@/lib/types";
 const matches = (p: Project, q: string) =>
   !q || [p.name, p.repo, p.desc, p.lang, ...p.topics, ...p.stack].join(" ").toLowerCase().includes(q);
 
+const STICKER_CHARACTERS = Array.from("BUILD IT · REFINE IT · SHIP IT · ");
+
 const SectionHeading = ({ title, pill }: { title: string; pill: React.ReactNode }) => (
   <Reveal className="mb-[34px] flex flex-wrap items-center gap-[18px]">
     <h2 className="m-0 font-display text-[clamp(40px,6vw,88px)] leading-[.95] tracking-[-.04em] uppercase">{title}</h2>
@@ -82,11 +84,14 @@ export const HomeView = ({ projects, user }: { projects: Project[]; user: User }
           </div>
           <svg viewBox="0 0 200 200" className="absolute -top-2 -right-1.5 w-[clamp(110px,12vw,150px)] animate-spin-slow" aria-hidden="true">
             <circle cx="100" cy="100" r="96" fill="#ff4d8d" stroke="#000" strokeWidth="5" />
-            <defs><path id="sticker-path" d="M100,100 m-68,0 a68,68 0 1,1 136,0 a68,68 0 1,1 -136,0" /></defs>
-            {/* textLength pins the text to the circle's circumference (2π·68 ≈ 427) so the three phrases fill it evenly. */}
-            <text fontFamily="var(--font-space-mono), monospace" fontWeight="700" fontSize="17">
-              <textPath href="#sticker-path" textLength="422" lengthAdjust="spacing">BUILD IT · REFINE IT · SHIP IT · </textPath>
-            </text>
+            {/* Equal character slots include the final space, keeping the seam even in every browser. */}
+            <g fontFamily="var(--font-space-mono), monospace" fontWeight="700" fontSize="17" textAnchor="middle">
+              {STICKER_CHARACTERS.map((character, index) => (
+                <text key={index} x="100" y="32" transform={`rotate(${-90 + (index + 0.5) * 360 / STICKER_CHARACTERS.length} 100 100)`}>
+                  {character}
+                </text>
+              ))}
+            </g>
           </svg>
         </div>
       </header>
@@ -104,7 +109,7 @@ export const HomeView = ({ projects, user }: { projects: Project[]; user: User }
                 className="grid rotate-(--rot) overflow-hidden rounded-3xl border-4 border-black shadow-hard-xl transition-[translate,rotate,box-shadow] duration-200 [transition-timing-function:cubic-bezier(.3,1.5,.5,1)] hover:translate-x-1 hover:translate-y-1 hover:rotate-0 hover:shadow-[4px_4px_0_#000]"
                 style={{ background: cardColor(i), "--rot": `${FEATURED_ROTATION[k % 4]}deg` } as React.CSSProperties}
               >
-                <div className="relative aspect-video border-b-4 border-black" style={{ background: stripeArt(p.color) }}>
+                <div className="relative aspect-[8/5] border-b-4 border-black" style={{ background: stripeArt(p.color) }}>
                   <ProjectImage src={p.visual} fallback={p.og} />
                   <span className="absolute top-3.5 left-3.5 rounded-full border-3 border-black bg-white px-[11px] py-2 font-mono text-xs leading-none font-bold">{statusOf(p)}</span>
                   <span className="absolute top-3.5 right-3.5 grid size-11 place-items-center rounded-full bg-black font-display text-[15px] leading-none text-sun">{pad2(i)}</span>

@@ -108,11 +108,8 @@ async function ProjectContent({ params }: { params: PageProps<"/projects/[slug]"
             </a>
           </div>
         </div>
-        <div className="relative min-h-80 overflow-hidden rounded-[28px] border-4 border-black shadow-hard-xl" style={{ background: stripeArt(p.color) }}>
+        <div className="relative aspect-[8/5] self-center overflow-hidden rounded-[28px] border-4 border-black shadow-hard-xl" style={{ background: stripeArt(p.color) }}>
           <ProjectImage src={p.visual} fallback={p.og} priority />
-          <span className="absolute bottom-3.5 left-3.5 rounded-lg border-3 border-black bg-white px-[11px] py-2 font-mono text-xs leading-none font-bold">
-            {p.custom ? "custom thumbnail" : (p.homepage ?? "github social card")}
-          </span>
         </div>
       </header>
 
