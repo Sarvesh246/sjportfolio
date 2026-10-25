@@ -15,7 +15,8 @@ export const ProjectImage = ({ src, fallback, priority }: { src: string | null; 
       alt=""
       loading={priority ? "eager" : "lazy"}
       onError={() => setStage((s) => s + 1)}
-      className="absolute inset-0 h-full w-full object-cover object-top"
+      // Site screenshots are cropped to fill; the GitHub social card is a 2:1 graphic with text near the edges, so show all of it.
+      className={`absolute inset-0 h-full w-full ${url === fallback ? "bg-white object-contain object-center" : "object-cover object-top"}`}
     />
   );
 };

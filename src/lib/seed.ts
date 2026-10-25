@@ -44,9 +44,10 @@ export const ogImage = (repo: string) => `https://opengraph.githubassets.com/1/$
 // Microlink's free tier needs no key and serves a small JPEG. thum.io (used in the design mock) now returns a
 // "sign up" placeholder with a 200 status, which an onError fallback can't catch. If Microlink rate-limits, the
 // response isn't an image, so <ProjectImage> drops to the GitHub social card.
-export const screenshot = (host: string | null) =>
+// `v` is ignored by Microlink's cache but changes the URL, so browsers/CDNs refetch after a refresh.
+export const screenshot = (host: string | null, v?: number) =>
   host
-    ? `https://api.microlink.io/?url=${encodeURIComponent(`https://${host.replace(/^https?:\/\//, "")}`)}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1280&viewport.height=720&viewport.deviceScaleFactor=1&screenshot.type=jpeg&screenshot.quality=70`
+    ? `https://api.microlink.io/?url=${encodeURIComponent(`https://${host.replace(/^https?:\/\//, "")}`)}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1280&viewport.height=720&viewport.deviceScaleFactor=1&screenshot.type=jpeg&screenshot.quality=70${v ? `&v=${v}` : ""}`
     : null;
 
 type Raw = {

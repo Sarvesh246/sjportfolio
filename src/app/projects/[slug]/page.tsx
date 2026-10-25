@@ -7,7 +7,9 @@ import { ProjectImage } from "@/components/project-image";
 import { NextUp, ProjectTitle } from "@/components/project-title";
 import { getPortfolio, getProject } from "@/lib/github";
 import { HEAT_OPACITY, cardColor, pad2, statusOf, stripeArt } from "@/lib/palette";
+import { getThumbnails, withThumbnails } from "@/lib/thumbnails";
 import type { TreeEntry } from "@/lib/types";
+import { AdminPanel } from "@/components/admin-panel";
 
 export const generateStaticParams = async () => (await getPortfolio()).projects.map((p) => ({ slug: p.slug }));
 
@@ -56,16 +58,18 @@ export default function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
 
 async function ProjectContent({ params }: { params: PageProps<"/projects/[slug]">["params"] }) {
   const { slug } = await params;
-  const [p, { projects }] = await Promise.all([getProject(slug), getPortfolio()]);
-  if (!p) notFound();
+  const [base, { projects }, thumbs] = await Promise.all([getProject(slug), getPortfolio(), getThumbnails()]);
+  if (!base) notFound();
+  const p = withThumbnails([base], thumbs)[0];
 
   const i = projects.findIndex((x) => x.slug === slug);
   const next = projects[(i + 1) % projects.length];
   const bg = cardColor(i);
   const kpis = [
-    { k: "Commits", v: p.commits.toLocaleString("en-US"), d: 0, bg: "#ffd23f" },
+    // 0 means "GitHub didn't give us a count" (no token), not a repo with no commits.
+    { k: "Commits", v: p.commits ? p.commits.toLocaleString("en-US") : "—", d: 0, bg: "#ffd23f" },
     { k: "Last push", v: p.updated, d: 60, bg: "#8ec5ff" },
-    { k: "Languages", v: String(p.langs.length), d: 120, bg: "#b6f2a0" },
+    { k: "Languages", v: p.langs.length ? String(p.langs.length) : "—", d: 120, bg: "#b6f2a0" },
     { k: "License", v: p.license ?? "—", d: 180, bg: "#ff90e8" },
   ];
   const readme = p.readme.length ? p.readme : [{ h: "No README yet", p: "This repo hasn’t got a README to summarise, so there’s nothing to show here.", li: [] }];
@@ -77,7 +81,7 @@ async function ProjectContent({ params }: { params: PageProps<"/projects/[slug]"
       </Link>
 
       <header className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,440px),1fr))] items-stretch gap-[34px]">
-        <div className="grid content-between gap-[22px] rounded-[28px] border-4 border-black p-[clamp(24px,4vw,48px)] shadow-hard-xl" style={{ background: bg }}>
+        <div className="grid min-w-0 content-between gap-[22px] rounded-[28px] border-4 border-black p-[clamp(24px,4vw,48px)] shadow-hard-xl" style={{ background: bg }}>
           <span className="w-fit rounded-full border-3 border-black bg-white px-3 py-2 font-mono text-xs leading-none font-bold">
             {statusOf(p)} · #{pad2(i)}
           </span>
@@ -107,10 +111,12 @@ async function ProjectContent({ params }: { params: PageProps<"/projects/[slug]"
         <div className="relative min-h-80 overflow-hidden rounded-[28px] border-4 border-black shadow-hard-xl" style={{ background: stripeArt(p.color) }}>
           <ProjectImage src={p.visual} fallback={p.og} priority />
           <span className="absolute bottom-3.5 left-3.5 rounded-lg border-3 border-black bg-white px-[11px] py-2 font-mono text-xs leading-none font-bold">
-            {p.homepage ?? "github social card"}
+            {p.custom ? "custom thumbnail" : (p.homepage ?? "github social card")}
           </span>
         </div>
       </header>
+
+      <AdminPanel slug={p.slug} custom={!!p.custom} />
 
       {p.topics.length > 0 && (
         <div className="mt-[34px] flex flex-wrap gap-2.5">
@@ -184,7 +190,7 @@ async function ProjectContent({ params }: { params: PageProps<"/projects/[slug]"
       <Reveal className="mt-11 grid gap-[18px] rounded-3xl border-4 border-black bg-black p-[clamp(22px,3vw,34px)] text-white shadow-[8px_8px_0_#ffd23f]">
         <div className="nb-label flex flex-wrap justify-between gap-2.5">
           <span>Activity · 52 weeks</span>
-          <span className="text-sun">{p.commits.toLocaleString("en-US")} commits</span>
+          {p.commits > 0 && <span className="text-sun">{p.commits.toLocaleString("en-US")} commits</span>}
         </div>
         <div className="grid grid-flow-col grid-rows-7 auto-cols-fr gap-1" aria-hidden="true">
           {p.heat.map((v, k) => (

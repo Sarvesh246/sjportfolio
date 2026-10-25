@@ -27,6 +27,8 @@ export type Project = {
   og: string | null;
   url: string;
   sample: boolean;
+  /** True when `visual` is a thumbnail the owner uploaded. */
+  custom?: boolean;
 };
 
 export type User = {

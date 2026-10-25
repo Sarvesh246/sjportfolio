@@ -21,6 +21,16 @@ Copy `.env.example` to `.env.local` and set:
 - `GITHUB_TOKEN` is worth adding. GitHub allows only 60 anonymous requests an hour, and a token unlocks real commit counts.
 - `NEXT_PUBLIC_CONTACT_EMAIL` for the "Email me" button. It points at a placeholder until you set it.
 
+## Your own thumbnails
+
+Put an image at `public/thumbnails/<repo-name>.png` (`.jpg`, `.webp`, `.gif` and `.avif` work too, 16:9 looks best) and push. It replaces that project's screenshot everywhere. There's no upload form on purpose: only someone who can push to the repo can change it, so there's nothing to secure and no storage to pay for.
+
+## Refreshing a project (owner only)
+
+The site re-scrapes GitHub on its own about once an hour. If you've just pushed a change and don't want to wait, visit `/admin`, sign in, and every project page gets a **Refresh this project** button that only you see. It re-scrapes GitHub immediately and asks Microlink to retake the screenshot.
+
+To switch it on, set `ADMIN_PASSWORD` to something long (in `.env.local`, and in Vercel's env settings). Unset means no way in. The button works because the server checks a signed, HttpOnly cookie that only the password can create.
+
 ## Good to know
 
 - **Curated vs live.** `src/lib/seed.ts` holds hand-written copy (descriptions, stack, README summaries) for the repos worth showing off. Live GitHub data fills in everything else and wins for anything that changes: language, last push, homepage, topics.

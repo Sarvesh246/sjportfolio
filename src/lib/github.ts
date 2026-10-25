@@ -1,8 +1,10 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { HANDLE, SEED_PROJECTS, SEED_USER, ago, fakeSha, heatmap, langColor, ogImage, screenshot, GH } from "./seed";
 import type { Commit, Lang, Portfolio, Project, ReadmeSection, TreeEntry } from "./types";
 
 const API = "https://api.github.com";
+export const PORTFOLIO_TAG = "portfolio";
+export const projectTag = (slug: string) => `project:${slug}`;
 const TOKEN = process.env.GITHUB_TOKEN;
 
 type GhRepo = {
@@ -13,6 +15,7 @@ type GhRepo = {
 
 const headers = (accept = "application/vnd.github+json"): HeadersInit => ({
   Accept: accept,
+  "User-Agent": "sjportfolio",
   "X-GitHub-Api-Version": "2022-11-28",
   ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
 });
@@ -43,7 +46,7 @@ const commitCount = async (repo: string): Promise<number | null> => {
   }
 };
 
-const mergeRepo = (live: GhRepo, seed: Project | undefined, commits: number | null): Project => {
+const mergeRepo = (live: GhRepo, seed: Project | undefined, commits: number | null, stamp: number): Project => {
   const days = daysSince(live.pushed_at);
   const lang = live.language ?? seed?.lang ?? "Text";
   const homepage = hostOf(live.homepage) ?? seed?.homepage ?? null;
@@ -65,7 +68,7 @@ const mergeRepo = (live: GhRepo, seed: Project | undefined, commits: number | nu
     homepage,
     license: live.license?.spdx_id && live.license.spdx_id !== "NOASSERTION" ? live.license.spdx_id : base.license,
     topics: live.topics?.length ? live.topics : base.topics,
-    visual: screenshot(homepage) ?? ogImage(live.name),
+    visual: screenshot(homepage, stamp) ?? ogImage(live.name),
     og: ogImage(live.name),
     url: live.html_url || GH + live.name,
     sample: false,
@@ -78,7 +81,8 @@ const fetchLive = async (): Promise<Portfolio> => {
 
   // Commit counts cost one request per repo, so only spend the rate limit when a token is set.
   const counts = TOKEN ? await Promise.all(repos.map((r) => commitCount(r.name))) : repos.map(() => null);
-  const projects = repos.map((r, i) => mergeRepo(r, SEED_PROJECTS.find((s) => s.repo === r.name), counts[i]));
+  const stamp = Date.now();
+  const projects = repos.map((r, i) => mergeRepo(r, SEED_PROJECTS.find((s) => s.repo === r.name), counts[i], stamp));
 
   // REST has no "pinned" endpoint, so pins are the curated seed flags; fall back to the freshest deployed repos.
   if (!projects.some((p) => p.pinned)) {
@@ -105,7 +109,9 @@ const fetchLive = async (): Promise<Portfolio> => {
 
 export const getPortfolio = async (): Promise<Portfolio> => {
   "use cache";
+  // Re-scrapes about hourly on its own (stale-while-revalidate); the owner's refresh button expires this tag immediately.
   cacheLife("hours");
+  cacheTag(PORTFOLIO_TAG);
   try {
     return await fetchLive();
   } catch (err) {
@@ -158,6 +164,7 @@ const toLog = (repo: string, rows: { sha: string; commit: { message: string; aut
 export const getProject = async (slug: string): Promise<Project | null> => {
   "use cache";
   cacheLife("hours");
+  cacheTag(projectTag(slug));
   const { projects, live } = await getPortfolio();
   const base = projects.find((p) => p.slug === slug);
   if (!base) return null;

@@ -83,8 +83,9 @@ export const HomeView = ({ projects, user }: { projects: Project[]; user: User }
           <svg viewBox="0 0 200 200" className="absolute -top-2 -right-1.5 w-[clamp(110px,12vw,150px)] animate-spin-slow" aria-hidden="true">
             <circle cx="100" cy="100" r="96" fill="#ff4d8d" stroke="#000" strokeWidth="5" />
             <defs><path id="sticker-path" d="M100,100 m-68,0 a68,68 0 1,1 136,0 a68,68 0 1,1 -136,0" /></defs>
-            <text fontFamily="var(--font-space-mono), monospace" fontWeight="700" fontSize="19" letterSpacing="3">
-              <textPath href="#sticker-path">SHIP IT · SHIP IT · SHIP IT · </textPath>
+            {/* textLength pins the text to the circle's circumference (2π·68 ≈ 427) so the three phrases fill it evenly. */}
+            <text fontFamily="var(--font-space-mono), monospace" fontWeight="700" fontSize="17">
+              <textPath href="#sticker-path" textLength="422" lengthAdjust="spacing">BUILD IT · REFINE IT · SHIP IT · </textPath>
             </text>
           </svg>
         </div>
@@ -109,11 +110,11 @@ export const HomeView = ({ projects, user }: { projects: Project[]; user: User }
                   <span className="absolute top-3.5 right-3.5 grid size-11 place-items-center rounded-full bg-black font-display text-[15px] leading-none text-sun">{pad2(i)}</span>
                 </div>
                 <div className="grid gap-3.5 p-6">
-                  <h3 className="m-0 font-display text-[clamp(30px,3vw,42px)] leading-none tracking-[-.035em] uppercase">{p.name}</h3>
+                  <h3 className="m-0 font-display text-[clamp(30px,3vw,42px)] leading-none tracking-[-.035em] [overflow-wrap:anywhere] uppercase">{p.name}</h3>
                   <p className="m-0 text-pretty text-[16.5px] leading-normal font-medium">{p.desc}</p>
                   <div className="flex flex-wrap gap-2 font-mono text-xs leading-none font-bold">
                     <span className="rounded-lg border-[2.5px] border-black bg-white px-2.5 py-2">{p.lang}</span>
-                    <span className="rounded-lg border-[2.5px] border-black bg-white px-2.5 py-2">{p.commits.toLocaleString("en-US")} commits</span>
+                    {p.commits > 0 && <span className="rounded-lg border-[2.5px] border-black bg-white px-2.5 py-2">{p.commits.toLocaleString("en-US")} commits</span>}
                     <span className="ml-auto rounded-lg border-[2.5px] border-black bg-black px-2.5 py-2 text-white">OPEN →</span>
                   </div>
                 </div>
@@ -137,7 +138,7 @@ export const HomeView = ({ projects, user }: { projects: Project[]; user: User }
               style={{ "--card": cardColor(i) } as React.CSSProperties}
             >
               <div className="flex items-start justify-between gap-2.5">
-                <h3 className="m-0 font-display text-[22px] leading-[1.05] tracking-[-.03em] uppercase">{p.name}</h3>
+                <h3 className="m-0 min-w-0 font-display text-[22px] leading-[1.05] tracking-[-.03em] [overflow-wrap:anywhere] uppercase">{p.name}</h3>
                 <span className="flex-none font-mono text-[11px] leading-none font-bold text-black/65">{pad2(i)}</span>
               </div>
               <p className="nb-clamp-3 m-0 text-[14.5px] leading-normal font-medium">{p.desc || "No description yet."}</p>
